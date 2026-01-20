@@ -49,10 +49,27 @@ A comprehensive real-time dashboard for monitoring urban air quality across Tami
 
 ## 🚀 Installation
 
+
+### Option 1: Using Docker (Recommended)
+This is the easiest way to run the application without installing Python dependencies manually.
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/NithinJoelJ/Andhra_Pradesh-Telengana-Smart-Traffict-Management.git
+
+# 2. Navigate to the project directory
+cd Andhra_Pradesh-Telengana-Smart-Traffict-Management
+
+# 3. Run with Docker Compose
+docker compose up --build
+```
+The application will be available at http://localhost:8501
+
+### Option 2: Manual Installation
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd Smart-City-Traffic-Pollution-Monitor-main
+git clone https://github.com/NithinJoelJ/Andhra_Pradesh-Telengana-Smart-Traffict-Management.git
+cd Andhra_Pradesh-Telengana-Smart-Traffict-Management
 
 # Install dependencies
 pip install -r requirements.txt

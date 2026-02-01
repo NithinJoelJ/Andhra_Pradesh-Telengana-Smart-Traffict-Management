@@ -149,11 +149,18 @@ def fetch_air_quality_forecast(lat, lon, hours_ahead=48):
         data = resp.json()
         records = []
 
-        max_time = datetime.utcnow() + timedelta(hours=hours_ahead)
+        now = now_ist()
+        max_time_ist = now + timedelta(hours=hours_ahead)
 
         for item in data.get("list", []):
-            max_time = now_ist() + timedelta(hours=hours_ahead)
-            if ts > max_time:
+            dt_val = item.get("dt")
+            if dt_val is None:
+                continue
+            
+            # Convert unix timestamp to IST
+            ts = utc_to_ist(datetime.utcfromtimestamp(dt_val))
+            
+            if ts > max_time_ist:
                 continue
 
             main = item.get("main", {})

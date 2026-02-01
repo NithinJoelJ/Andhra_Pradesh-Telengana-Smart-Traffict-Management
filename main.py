@@ -11,6 +11,20 @@ from datetime import datetime, timedelta
 import time
 import random
 import requests
+import pytz
+
+IST = pytz.timezone("Asia/Kolkata")
+
+def now_ist():
+    """Return current IST time (timezone-aware)"""
+    return datetime.now(IST)
+
+def utc_to_ist(utc_dt):
+    """Convert UTC datetime to IST"""
+    if utc_dt.tzinfo is None:
+        utc_dt = utc_dt.replace(tzinfo=pytz.utc)
+    return utc_dt.astimezone(IST)
+
 
 # Page Configuration
 st.set_page_config(
@@ -138,7 +152,7 @@ def fetch_air_quality_forecast(lat, lon, hours_ahead=48):
         max_time = datetime.utcnow() + timedelta(hours=hours_ahead)
 
         for item in data.get("list", []):
-            ts = datetime.utcfromtimestamp(item.get("dt", 0))
+            max_time = now_ist() + timedelta(hours=hours_ahead)
             if ts > max_time:
                 continue
 
@@ -216,7 +230,9 @@ def fetch_realtime_air_quality(lat, lon):
                     'so2': components.get('so2', 0),
                     'co': components.get('co', 0) / 1000,  # Convert to mg/m³
                     'o3': components.get('o3', 0),
-                    'timestamp': datetime.utcfromtimestamp(current.get('dt', 0)),
+                    'timestamp': utc_to_ist(
+                        datetime.utcfromtimestamp(current.get('dt', 0))
+                    ),
                     'source': 'OpenWeather API'
                 }
     except Exception as e:
@@ -228,7 +244,7 @@ def fetch_realtime_air_quality(lat, lon):
 # Initialize session state
 if 'realtime_data' not in st.session_state:
     st.session_state.realtime_data = []
-    st.session_state.last_update = datetime.now()
+    st.session_state.last_update = now_ist()
 
 if 'page' not in st.session_state:
     st.session_state.page = 'Dashboard'
@@ -243,7 +259,7 @@ if 'show_hyderabad_areas' not in st.session_state:
 # Generate realistic realtime data
 def generate_realtime_traffic_data(location=None):
     """Generate data point with timestamp for streaming - tries API first, then random"""
-    current_time = datetime.now()
+    current_time = now_ist()
 
     # If location not specified, pick randomly
     if location is None:
@@ -323,7 +339,7 @@ def generate_realtime_traffic_data(location=None):
 
 def update_realtime_data(location=None):
     """Maintain rolling 3-minute window of data"""
-    current_time = datetime.now()
+    current_time = now_ist()
     cutoff_time = current_time - timedelta(minutes=3)
 
     # Remove old data
@@ -375,7 +391,7 @@ def generate_static_data(include_hyderabad_areas=False):
 @st.cache_data
 def generate_time_series_data(days=7):
     """Generate historical data"""
-    dates = pd.date_range(end=datetime.now(), periods=days * 24, freq='H')
+    dates = pd.date_range(end=now_ist(), periods=days * 24, freq='H')
     data = []
     for date in dates:
         hour = date.hour
